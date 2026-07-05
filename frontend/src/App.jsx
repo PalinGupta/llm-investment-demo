@@ -1,35 +1,46 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import "./App.css";
 
 function App() {
-  const [backend, setBackend] = useState("Checking backend...");
+  const [stocks, setStocks] = useState([]);
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/")
+      .get("http://127.0.0.1:8000/stocks")
       .then((response) => {
-        setBackend(
-          `${response.data.project} — ${response.data.status}`
-        );
+        setStocks(response.data);
       })
-      .catch(() => {
-        setBackend("❌ Backend Not Connected");
+      .catch((error) => {
+        console.error("Error fetching stock data:", error);
       });
   }, []);
 
   return (
-    <div
-      style={{
-        fontFamily: "Arial",
-        padding: "40px",
-        textAlign: "center",
-      }}
-    >
-      <h1>LLM Investment Strategy Platform</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>LLM Investment Strategy Demo</h1>
 
-      <h2>{backend}</h2>
+      <table border="1" cellPadding="10">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Company</th>
+            <th>Price</th>
+            <th>Change</th>
+          </tr>
+        </thead>
 
-      <p>Frontend and Backend are now connected.</p>
+        <tbody>
+          {stocks.map((stock, index) => (
+            <tr key={index}>
+              <td>{stock.Symbol}</td>
+              <td>{stock.Company}</td>
+              <td>{stock.Price}</td>
+              <td>{stock.Change}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

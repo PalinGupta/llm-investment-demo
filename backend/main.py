@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import csv
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -30,3 +31,15 @@ def health():
     return {
         "status": "healthy"
     }
+
+@app.get("/stocks")
+def get_stocks():
+    stocks = []
+
+    with open("data/sample_stock_data.csv", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            stocks.append(row)
+
+    return stocks
