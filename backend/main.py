@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import csv
+from services.parser import parse_strategy
+from services.backtest import run_backtest
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -39,81 +41,29 @@ class StrategyRequest(BaseModel):
 @app.post("/strategy")
 def submit_strategy(request: StrategyRequest):
 
+    parsed = parse_strategy(request.strategy)
+
+    action = parsed["action"]
+    stock = parsed["stock"]
+    condition = parsed["condition"]
+
     strategy = request.strategy.upper()
 
-    action = "UNKNOWN"
-    stock = "UNKNOWN"
-    condition = "UNKNOWN"
-
-    # Detect BUY / SELL
-    if "BUY" in strategy:
-        action = "BUY"
-    elif "SELL" in strategy:
-        action = "SELL"
-
-    # Detect stock
-    stocks = [
-        "RELIANCE",
-        "TCS",
-        "INFY",
-        "HDFCBANK",
-        "ICICIBANK",
-        "SBIN"
-    ]
-
-    for s in stocks:
-        if s in strategy:
-            stock = s
-            break
-
-    # Detect condition
-    if "ABOVE" in strategy:
-        price = strategy.split("ABOVE")[-1].strip()
-        condition = f"Price Above {price}"
-
-    elif "BELOW" in strategy:
-        price = strategy.split("BELOW")[-1].strip()
-        condition = f"Price Below {price}"
-
-    current_price = None
-
-    with open("data/sample_stock_data.csv", newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-
-        for row in reader:
-            if row["Symbol"] == stock:
-                current_price = float(row["Price"])
-                break
-    
-    signal = "No Signal"
-
-    if current_price is not None:
-
-        if "ABOVE" in strategy:
-            target_price = float(strategy.split("ABOVE")[-1].strip())
-
-            if current_price > target_price:
-                if action == "BUY":
-                    signal = "Buy Signal Generated ✅"
-                elif action == "SELL":
-                    signal = "Sell Signal Generated ✅"
-
-        elif "BELOW" in strategy:
-            target_price = float(strategy.split("BELOW")[-1].strip())
-
-            if current_price < target_price:
-                if action == "BUY":
-                    signal = "Buy Signal Generated ✅"
-                elif action == "SELL":
-                    signal = "Sell Signal Generated ✅"
+    backtest_result = run_backtest(
+        action,
+        stock,
+        strategy
+    )
 
     return {
-    "action": action,
-    "stock": stock,
-    "condition": condition,
-    "current_price": current_price,
-    "signal": signal
-}
+        "action": action,
+        "stock": stock,
+        "condition": condition,
+        "current_price": backtest_result["current_price"],
+        "signal": backtest_result["signal"],
+        "backtest": backtest_result["backtest"],
+    }
+
 
 @app.get("/stocks")
 def get_stocks():

@@ -1,11 +1,30 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 function App() {
   const [stocks, setStocks] = useState([]);
   const [strategy, setStrategy] = useState("");
   const [response, setResponse] = useState(null);
+
+  const chartData = [
+    { month: "Jan", value: 10000 },
+    { month: "Feb", value: 10250 },
+    { month: "Mar", value: 10100 },
+    { month: "Apr", value: 10650 },
+    { month: "May", value: 11050 },
+    { month: "Jun", value: 11600 },
+    { month: "Jul", value: 12140 },
+  ];
 
   const submitStrategy = async () => {
   try {
@@ -34,8 +53,8 @@ useEffect(() => {
     });
 }, []);
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>LLM Investment Strategy Demo</h1>
+    <div className="container">
+      <h1>LLM Investment Strategy</h1>
       <h2>Enter Investment Strategy</h2>
 
       <textarea
@@ -54,15 +73,30 @@ useEffect(() => {
       </button>
 
       {response && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "15px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            width: "400px",
-          }}
-        >
+        <div className="analysis-card">
+        
+          <div className="metrics">
+            <div className="metric-box">
+              <h2>{response.action}</h2>
+              <p>Action</p>
+            </div>
+
+            <div className="metric-box">
+              <h2>{response.stock}</h2>
+              <p>Stock</p>
+            </div>
+
+            <div className="metric-box">
+              <h2>₹{response.current_price}</h2>
+              <p>Current Price</p>
+            </div>
+
+            <div className="metric-box">
+              <h2>{response.signal.includes("Generated") ? "✅" : "❌"}</h2>
+              <p>Signal</p>
+            </div>
+          </div>
+          
           <h3>Parsed Strategy</h3>
 
           <p>
@@ -83,6 +117,49 @@ useEffect(() => {
         <p>
             <strong>Signal:</strong> {response.signal}
         </p>
+        <hr />
+
+        <h3>Historical Backtest</h3>
+
+        <p>
+          <strong>Trades Executed:</strong> {response.backtest.trades}
+        </p>
+
+        <p>
+          <strong>Winning Trades:</strong> {response.backtest.winning_trades}
+        </p>
+
+        <p>
+          <strong>Win Rate:</strong> {response.backtest.win_rate}
+        </p>
+
+        <p>
+          <strong>Total Return:</strong> {response.backtest.total_return}
+        </p>
+
+        <p>
+          <strong>Max Drawdown:</strong> {response.backtest.max_drawdown}
+        </p>
+        <hr />
+
+        <h3>Portfolio Performance</h3>
+
+        <div style={{ width: "100%", height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#2563eb"
+                strokeWidth={3}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
         </div>
       )}
 
