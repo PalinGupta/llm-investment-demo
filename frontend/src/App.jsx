@@ -76,6 +76,13 @@ useEffect(() => {
           <p>
             <strong>Condition:</strong> {response.condition}
           </p>
+          <p>
+            <strong>Current Price:</strong> ₹{response.current_price}
+        </p>
+
+        <p>
+            <strong>Signal:</strong> {response.signal}
+        </p>
         </div>
       )}
 
