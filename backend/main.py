@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import csv
 
 app = FastAPI(
@@ -30,6 +31,16 @@ def root():
 def health():
     return {
         "status": "healthy"
+    }
+
+class StrategyRequest(BaseModel):
+    strategy: str
+    
+@app.post("/strategy")
+def submit_strategy(request: StrategyRequest):
+    return {
+        "message": "Strategy received successfully!",
+        "strategy": request.strategy
     }
 
 @app.get("/stocks")
