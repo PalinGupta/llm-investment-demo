@@ -5,7 +5,7 @@ import "./App.css";
 function App() {
   const [stocks, setStocks] = useState([]);
   const [strategy, setStrategy] = useState("");
-  const [response, setResponse] = useState("");
+  const [response, setResponse] = useState(null);
 
   const submitStrategy = async () => {
   try {
@@ -16,7 +16,7 @@ function App() {
       }
     );
 
-    setResponse(res.data.message);
+    setResponse(res.data);
   } catch (error) {
     console.error(error);
     setResponse("Failed to submit strategy.");
@@ -53,7 +53,31 @@ useEffect(() => {
         Submit Strategy
       </button>
 
-      <p>{response}</p>
+      {response && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            width: "400px",
+          }}
+        >
+          <h3>Parsed Strategy</h3>
+
+          <p>
+            <strong>Action:</strong> {response.action}
+          </p>
+
+          <p>
+            <strong>Stock:</strong> {response.stock}
+          </p>
+
+          <p>
+            <strong>Condition:</strong> {response.condition}
+          </p>
+        </div>
+      )}
 
       <hr />
 

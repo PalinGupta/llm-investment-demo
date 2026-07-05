@@ -35,13 +35,85 @@ def health():
 
 class StrategyRequest(BaseModel):
     strategy: str
-    
+
 @app.post("/strategy")
 def submit_strategy(request: StrategyRequest):
+
+    strategy = request.strategy.upper()
+
+    action = "UNKNOWN"
+    stock = "UNKNOWN"
+    condition = "UNKNOWN"
+
+    # Detect BUY / SELL
+    if "BUY" in strategy:
+        action = "BUY"
+    elif "SELL" in strategy:
+        action = "SELL"
+
+    # Detect stock
+    stocks = [
+        "RELIANCE",
+        "TCS",
+        "INFY",
+        "HDFCBANK",
+        "ICICIBANK",
+        "SBIN"
+    ]
+
+    for s in stocks:
+        if s in strategy:
+            stock = s
+            break
+
+    # Detect condition
+    if "ABOVE" in strategy:
+        price = strategy.split("ABOVE")[-1].strip()
+        condition = f"Price Above {price}"
+
+    elif "BELOW" in strategy:
+        price = strategy.split("BELOW")[-1].strip()
+        condition = f"Price Below {price}"
+
+    current_price = None
+
+    with open("data/sample_stock_data.csv", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            if row["Symbol"] == stock:
+                current_price = float(row["Price"])
+                break
+    
+    signal = "No Signal"
+
+    if current_price is not None:
+
+        if "ABOVE" in strategy:
+            target_price = float(strategy.split("ABOVE")[-1].strip())
+
+            if current_price > target_price:
+                if action == "BUY":
+                    signal = "Buy Signal Generated ✅"
+                elif action == "SELL":
+                    signal = "Sell Signal Generated ✅"
+
+        elif "BELOW" in strategy:
+            target_price = float(strategy.split("BELOW")[-1].strip())
+
+            if current_price < target_price:
+                if action == "BUY":
+                    signal = "Buy Signal Generated ✅"
+                elif action == "SELL":
+                    signal = "Sell Signal Generated ✅"
+
     return {
-        "message": "Strategy received successfully!",
-        "strategy": request.strategy
-    }
+    "action": action,
+    "stock": stock,
+    "condition": condition,
+    "current_price": current_price,
+    "signal": signal
+}
 
 @app.get("/stocks")
 def get_stocks():
