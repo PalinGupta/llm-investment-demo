@@ -15,6 +15,7 @@ function App() {
   const [stocks, setStocks] = useState([]);
   const [strategy, setStrategy] = useState("");
   const [response, setResponse] = useState(null);
+  const [history, setHistory] = useState([]);
 
   const chartData = [
     { month: "Jan", value: 10000 },
@@ -36,6 +37,7 @@ function App() {
     );
 
     setResponse(res.data);
+    setHistory((prev) => [res.data, ...prev]);
   } catch (error) {
     console.error(error);
     setResponse("Failed to submit strategy.");
@@ -112,12 +114,12 @@ useEffect(() => {
           </p>
           <p>
             <strong>Current Price:</strong> ₹{response.current_price}
-        </p>
+          </p>
 
-        <p>
+          <p>
             <strong>Signal:</strong> {response.signal}
-        </p>
-        <hr />
+          </p>
+          <hr />
 
         <h3>Historical Backtest</h3>
 
@@ -160,8 +162,32 @@ useEffect(() => {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        </div>
+       </div>
       )}
+
+      <hr />
+
+      <h2>Strategy History</h2>
+
+        {history.length === 0 ? (
+        <p>No strategies submitted yet.</p>
+        ) : (
+      <div>
+      {history.map((item, index) => (
+        <div
+          key={index}
+          className="analysis-card"
+          style={{ marginBottom: "15px" }}
+      >
+          <p><strong>Action:</strong> {item.action}</p>
+          <p><strong>Stock:</strong> {item.stock}</p>
+          <p><strong>Condition:</strong> {item.condition}</p>
+          <p><strong>Signal:</strong> {item.signal}</p>
+        </div>
+      ))}
+    </div>
+  )}
+      
 
       <hr />
 
