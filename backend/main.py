@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import csv
 from services.parser import parse_strategy
 from services.backtest import run_backtest
+from services.llm_parser import parse_with_llm
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -41,7 +42,16 @@ class StrategyRequest(BaseModel):
 @app.post("/strategy")
 def submit_strategy(request: StrategyRequest):
 
-    parsed = parse_strategy(request.strategy)
+    try:
+        import json
+        parsed = json.loads(parse_with_llm(request.strategy))
+        print("✅ Parsed using Ollama")
+
+    except Exception as e:
+        print("⚠️ Ollama failed:", e)
+        print("⚠️ Falling back to rule-based parser")
+
+        parsed = parse_strategy(request.strategy)
 
     action = parsed["action"]
     stock = parsed["stock"]
