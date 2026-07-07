@@ -144,6 +144,8 @@ useEffect(() => {
         </p>
         <hr />
 
+        
+
         <h3>Portfolio Performance</h3>
 
         <div style={{ width: "100%", height: 300 }}>
@@ -162,6 +164,17 @@ useEffect(() => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+
+        <hr />
+
+        <h3>🤖 AI Investment Analysis</h3>
+
+        <div className="analysis-card">
+          <p style={{ lineHeight: "1.8" }}>
+            {response.analysis}
+          </p>
+        </div>
+
        </div>
       )}
 

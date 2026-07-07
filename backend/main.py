@@ -6,6 +6,7 @@ from services.parser import parse_strategy
 from services.backtest import run_backtest
 from services.llm_parser import parse_with_llm
 from services.strategy_normalizer import normalize_strategy
+from services.analysis_generator import generate_analysis
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -67,6 +68,10 @@ def submit_strategy(request: StrategyRequest):
         stock,
         strategy
     )
+    analysis = generate_analysis(
+        strategy,
+        backtest_result["backtest"]
+    )
 
     return {
         "action": action,
@@ -75,6 +80,7 @@ def submit_strategy(request: StrategyRequest):
         "current_price": backtest_result["current_price"],
         "signal": backtest_result["signal"],
         "backtest": backtest_result["backtest"],
+        "analysis": analysis,
     }
 
 

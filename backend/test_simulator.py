@@ -10,4 +10,4 @@ print("Trades:", len(trades))
 
 print()
 
-print(trades[:10])
+print(trades[:10])      
