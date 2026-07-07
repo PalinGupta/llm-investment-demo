@@ -5,6 +5,7 @@ import csv
 from services.parser import parse_strategy
 from services.backtest import run_backtest
 from services.llm_parser import parse_with_llm
+from services.strategy_normalizer import normalize_strategy
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -53,11 +54,13 @@ def submit_strategy(request: StrategyRequest):
 
         parsed = parse_strategy(request.strategy)
 
+    parsed = normalize_strategy(parsed)
+
     action = parsed["action"]
     stock = parsed["stock"]
     condition = parsed["condition"]
 
-    strategy = request.strategy.upper()
+    strategy = f"{action} {stock} {condition}".upper()
 
     backtest_result = run_backtest(
         action,
