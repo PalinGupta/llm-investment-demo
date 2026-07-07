@@ -1,5 +1,6 @@
 import re
 from services.historical_data import load_stock_history
+from services.trade_simulator import simulate_trades
 
 
 CURRENT_PRICES = {
@@ -38,37 +39,49 @@ def run_backtest(action, stock, strategy):
     # Historical Analysis
     # -----------------------------
 
-    df = load_stock_history(stock)
+    trade_returns = simulate_trades(
+    stock,
+    direction,
+    target_price,
+    )
 
-    if target_price is not None:
+    trades = len(trade_returns)
 
-        if direction == "ABOVE":
-            signals = df[df["Close"] > target_price]
+    winning_trades = sum(
+        1 for trade in trade_returns if trade > 0
+    )
 
-        else:
-            signals = df[df["Close"] < target_price]
+    if trades > 0:
+
+        win_rate = round(
+            (winning_trades / trades) * 100,
+            2,
+        )
+
+        total_return = round(
+            sum(trade_returns),
+            2,
+        )
+
+        max_drawdown = round(
+            abs(min(trade_returns)),
+            2,
+        )
 
     else:
-        signals = df
 
-    trades = len(signals)
-
-    total_days = len(df)
-
-    win_rate = round((trades / total_days) * 100, 2)
-
-    return_percentage = round(win_rate * 0.6, 2)
-
-    max_drawdown = round(return_percentage * 0.25, 2)
+        win_rate = 0
+        total_return = 0
+        max_drawdown = 0
 
     return {
         "current_price": current_price,
         "signal": signal,
         "backtest": {
             "trades": trades,
-            "winning_trades": int(trades * 0.7),
+            "winning_trades": winning_trades,
             "win_rate": f"{win_rate}%",
-            "total_return": f"{return_percentage}%",
+            "total_return": f"{total_return}%",
             "max_drawdown": f"{max_drawdown}%",
         },
     }
