@@ -7,6 +7,7 @@ from services.backtest import run_backtest
 from services.llm_parser import parse_with_llm
 from services.strategy_normalizer import normalize_strategy
 from services.analysis_generator import generate_analysis
+from services.historical_data import load_stock_history
 
 app = FastAPI(
     title="LLM Investment Strategy Platform",
@@ -95,3 +96,12 @@ def get_stocks():
             stocks.append(row)
 
     return stocks
+
+@app.get("/history/{symbol}")
+def get_stock_history(symbol: str):
+
+    df = load_stock_history(symbol.upper())
+
+    chart_data = df[["Date", "Close"]].to_dict(orient="records")
+
+    return chart_data
